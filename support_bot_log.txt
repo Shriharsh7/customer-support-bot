@@ -1,0 +1,48 @@
+2025-03-16 13:16:08,985 - Use pytorch device_name: cpu
+2025-03-16 13:16:08,985 - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-03-16 13:16:11,790 - HTTP Request: GET https://api.gradio.app/pkg-version "HTTP/1.1 200 OK"
+2025-03-16 13:16:12,969 - HTTP Request: GET http://localhost:7860/gradio_api/startup-events "HTTP/1.1 200 OK"
+2025-03-16 13:16:13,971 - HTTP Request: HEAD http://0.0.0.0:7861/ "HTTP/1.1 200 OK"
+2025-03-16 13:16:13,976 - HTTP Request: HEAD http://localhost:7860/ "HTTP/1.1 200 OK"
+2025-03-16 13:17:46,936 - HTTP Request: GET http://0.0.0.0:7861/?__theme=system "HTTP/1.1 304 Not Modified"
+2025-03-16 13:17:47,339 - HTTP Request: GET http://0.0.0.0:7861/?__theme=system "HTTP/1.1 304 Not Modified"
+2025-03-16 13:29:04,580 - HTTP Request: GET http://0.0.0.0:7861/?__theme=system "HTTP/1.1 304 Not Modified"
+2025-03-16 13:29:05,000 - HTTP Request: GET http://0.0.0.0:7861/?__theme=system "HTTP/1.1 304 Not Modified"
+2025-03-16 13:29:32,409 - Uploaded TXT file: /tmp/gradio/d1f08e997e8a5bf6d9411434a4ed9ed7c10d2287cedce45e91c8a66d0fbff8dd/faq.txt
+2025-03-16 13:29:39,500 - Processed file: /tmp/gradio/d1f08e997e8a5bf6d9411434a4ed9ed7c10d2287cedce45e91c8a66d0fbff8dd/faq.txt
+2025-03-16 13:29:57,568 - Found relevant section using embeddings for query: What are the accepted payment methods?
+2025-03-16 13:30:01,407 - Query: What are the accepted payment methods?, Answer: Visa, MasterCard, PayPal, and Apple Pay
+2025-03-16 13:30:13,856 - Feedback: good
+2025-03-16 13:30:13,856 - Feedback accepted as 'good'. Waiting for next query.
+2025-03-16 13:30:28,120 - Found relevant section using embeddings for query: How to cancel my order?
+2025-03-16 13:30:35,392 - Query: How to cancel my order?, Answer: visit your order history
+2025-03-16 13:30:44,891 - Feedback: too vague
+2025-03-16 13:30:48,591 - Found relevant section using embeddings for query: How to cancel my order?
+2025-03-16 13:30:48,591 - Adjusted answer: visit your order history
+
+(More details:
+How to cancel my order?
+To cancel an order, visit your order history and click "Cancel" within 24 hours of purchase. If the order has shipped, you’ll need to request a return....)
+2025-03-16 13:30:57,611 - Feedback: good
+2025-03-16 13:30:57,611 - Feedback accepted as 'good'. Waiting for next query.
+2025-03-16 13:31:16,953 - Found relevant section using embeddings for query: How do I contact support team? 
+2025-03-16 13:31:25,360 - Query: How do I contact support team? , Answer: Email us at support@example.com
+2025-03-16 13:31:39,651 - Feedback: good
+2025-03-16 13:31:39,651 - Feedback accepted as 'good'. Waiting for next query.
+2025-03-16 13:31:48,376 - Found relevant section using embeddings for query: How to change my email id/address?
+2025-03-16 13:31:55,552 - Query: How to change my email id/address?, Answer: go to account settings and enter the new email address
+2025-03-16 13:32:17,803 - Feedback: good
+2025-03-16 13:32:17,803 - Feedback accepted as 'good'. Waiting for next query.
+2025-03-16 13:32:26,668 - Found relevant section using embeddings for query: What are shipping and delivery timelines? 
+2025-03-16 13:32:35,691 - Query: What are shipping and delivery timelines? , Answer: ? 
+Orders are processed within 2 business days
+2025-03-16 13:32:58,672 - Feedback: good
+2025-03-16 13:32:58,672 - Feedback accepted as 'good'. Waiting for next query.
+2025-03-16 13:33:14,919 - Found relevant section using embeddings for query: How do I reset my password?
+2025-03-16 13:33:22,214 - Query: How do I reset my password?, Answer: go to the login page
+2025-03-16 13:33:33,875 - Feedback: not helpful
+2025-03-16 13:33:37,482 - Found relevant section using embeddings for query: How do I reset my password?
+2025-03-16 13:33:43,396 - Adjusted answer: go to the login page and click "Forgot Password
+2025-03-16 13:33:50,704 - Feedback: good
+2025-03-16 13:33:50,704 - Feedback accepted as 'good'. Waiting for next query.
+2025-03-16 13:33:54,515 - Log file downloaded by user.

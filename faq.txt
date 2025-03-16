@@ -1,0 +1,21 @@
+How do I reset my password ?
+To reset your password, go to the login page and click "Forgot Password." Enter your email and follow the link sent to you.
+
+What is the refund policy?  
+We offer refunds within 30 days of purchase. Contact support at support@example.com with your order number to start the process.
+
+How do I contact support team? 
+Email us at support@example.com or call 1-800-555-1234 during business hours (9 AM - 5 PM EST).
+
+How to change my email id/address?
+To change your email, go to account settings and enter the new email address. A verification email will be sent to confirm the change.
+
+What are shipping and delivery timelines? 
+Orders are processed within 2 business days. Standard shipping takes 5-7 days, while express shipping takes 2-3 days.
+
+How to cancel my order?
+To cancel an order, visit your order history and click "Cancel" within 24 hours of purchase. If the order has shipped, you’ll need to request a return.
+
+What are the accepted payment methods? 
+We accept Visa, MasterCard, PayPal, and Apple Pay. Payments via bank transfer are not supported.
+
