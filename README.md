@@ -13,6 +13,22 @@ The bot is deployed on **Hugging Face Spaces** for easy public access.
 
 ---
 
+## Recommended FAQ Document Format:
+
+When uploading your FAQ in either PDF or TXT format, please use the following style:
+
+How do I reset my password?  
+Go to the login page and click "Forgot Password." Enter your email and follow the link sent to you.
+
+**Important:**  
+- **Do not** label lines as `Question:` or `Answer:`.  
+- **Do not** use formats like `Q 21:` or `A:`.  
+- **Separate each Q/A pair** with a blank line (double newline) for better parsing.  
+
+This format ensures the bot can split your FAQ into distinct sections and retrieve the most relevant information when answering queries.
+
+---
+
 ## Features:
 
 ### Document Processing:
