@@ -11,17 +11,21 @@ class SupportBotAgent:
     def __init__(self, document_path):
         # Load a pre-trained question-answering model
         self.qa_model = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
+        
         # Set up an embedding model for finding relevant sections
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
+        
         # Load the document text and split it into sections (by paragraphs)
         self.document_text = self.load_document(document_path)
         self.sections = self.document_text.split('\n\n')
+
+        # Generate embeddings for all sections to enable fast similarity search.
         self.section_embeddings = self.embedder.encode(self.sections, convert_to_tensor=True)
         logging.info(f"Loaded document: {document_path}")
 
     def load_document(self, path):
         """Loads and extracts text from a given document (TXT or PDF) and logs it in the log file."""
-        
+            
         if path.lower().endswith(".txt"):
             file_type = "Text File"
             with open(path, 'r', encoding='utf-8') as file:
@@ -75,6 +79,7 @@ class SupportBotAgent:
         for section in self.sections:
             section_words = {word for word in section.lower().split() if word not in stopwords}
             common_words = query_words.intersection(section_words)
+            
             # Only consider it a match if there are at least 2 significant words overlapping
             if len(common_words) >= 2:
                 logging.info(f"Keyword match found for query: {query} with common words: {common_words}")
@@ -86,10 +91,18 @@ class SupportBotAgent:
 
 
     def answer_query(self, query):
+        """
+        Answers a user query by:
+        - Finding the most relevant section.
+        - Using a question-answering model to extract the exact answer.
+        """
         context = self.find_relevant_section(query)
+
+        # If no relevant context is found, return a default response.
         if not context:
             answer = "I don’t have enough information to answer that."
         else:
+            # Run the QA model to extract the most relevant answer span.
             result = self.qa_model(question=query, context=context, max_answer_len=50)
             answer = result["answer"]
         
@@ -98,18 +111,32 @@ class SupportBotAgent:
         return answer
 
     def get_feedback(self, response):
-        """ Ask for manual feedback from the user. """
+        """
+        Ask the user for manual feedback on the provided response.
+        The user can enter:
+        - 'good' (satisfied with the answer)
+        - 'too vague' (needs more details)
+        - 'not helpful' (needs a better answer)
+        """
+        
         feedback = input("Enter feedback (good, too vague, not helpful): ").strip().lower()
         logging.info(f"Feedback provided: {feedback}")
         return feedback
 
     def adjust_response(self, query, response, feedback):
-        """ Modify response based on feedback. """
+          """
+        Modifies the response based on user feedback.
+        - If 'too vague', appends more context.
+        - If 'not helpful', re-queries with a modified prompt.
+        """
+        
         if feedback == "too vague":
             context = self.find_relevant_section(query)
             adjusted_response = f"{response}\n\n(More details:\n{context[:500]}...)"
+            
         elif feedback == "not helpful":
             adjusted_response = self.answer_query(query + " Please provide more detailed information with examples.")
+            
         else:
             adjusted_response = response
         
@@ -117,12 +144,22 @@ class SupportBotAgent:
         return adjusted_response
 
     def run(self):
-        """ Run interactive mode: user inputs queries manually. """
+        """
+        Runs the bot in interactive mode.
+        - Accepts user input.
+        - Processes the query.
+        - Asks for feedback.
+        - Adjusts responses accordingly.
+        """
+        
         while True:
             query = input("Enter your query (or type 'exit' to quit): ")
+            
             if query.lower() == 'exit':
                 break
             logging.info(f"Processing query: {query}")
+
+            # Generate an answer based on document context.
             response = self.answer_query(query)
             print(f"Initial Response: {response}")
 
@@ -130,7 +167,9 @@ class SupportBotAgent:
             for _ in range(2):
                 feedback = self.get_feedback(response)
                 if feedback == "good":
-                    break
+                    break # Exit feedback loop as the user is satisfied.
+                    
+                # Adjust response and print updated answer.
                 response = self.adjust_response(query, response, feedback)
                 print(f"Updated Response: {response}")
 
