@@ -15,8 +15,8 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 # Load models
-qa_model = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
+qa_model = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad") # Load the Hugging Face QA model for extracting answers from retrieved context.
+embedder = SentenceTransformer('all-MiniLM-L6-v2') # Loading SentenceTransformer to convert text into vector embeddings for cosine similarity search.
 
 # Helper function to extract text from PDF
 def extract_text_from_pdf(file_path):
@@ -24,19 +24,27 @@ def extract_text_from_pdf(file_path):
     with open(file_path, "rb") as file:
         pdf_reader = PyPDF2.PdfReader(file)
         for page in pdf_reader.pages:
-            text += page.extract_text() + "\n"
+            text += page.extract_text() + "\n" # Extract text from each page and concatenate.
     return text
 
 # Find the most relevant section in the document
+
 def find_relevant_section(query, sections, section_embeddings):
+    """
+    1. First, it performs a semantic search using cosine similarity.
+    2. If the similarity score is below a threshold, it falls back to a keyword-based search.
+    """
+    
     stopwords = {"and", "the", "is", "for", "to", "a", "an", "of", "in", "on", "at", "with", "by", "it", "as", "so", "what"}
     
     # Semantic search
     query_embedding = embedder.encode(query, convert_to_tensor=True)
-    similarities = util.cos_sim(query_embedding, section_embeddings)[0]
+    similarities = util.cos_sim(query_embedding, section_embeddings)[0] # Compute cosine similarity between the query embedding and all section embeddings. 
     best_idx = similarities.argmax().item()
     best_section = sections[best_idx]
     similarity_score = similarities[best_idx].item()
+
+    # Defining a threshold to determine if semantic search is confident enough.
     
     SIMILARITY_THRESHOLD = 0.4
     if similarity_score >= SIMILARITY_THRESHOLD:
@@ -46,10 +54,14 @@ def find_relevant_section(query, sections, section_embeddings):
     logger.info(f"Low similarity ({similarity_score}). Falling back to keyword search.")
     
     # Keyword-based fallback search with stopword filtering
+    
     query_words = {word for word in query.lower().split() if word not in stopwords}
     for section in sections:
         section_words = {word for word in section.lower().split() if word not in stopwords}
         common_words = query_words.intersection(section_words)
+
+        # If at least two words match, return this section.
+        
         if len(common_words) >= 2:
             logger.info(f"Keyword match found for query: {query} with common words: {common_words}")
             return section
@@ -57,11 +69,14 @@ def find_relevant_section(query, sections, section_embeddings):
     logger.info(f"No good keyword match found. Returning default fallback response.")
     return "I don’t have enough information to answer that."
 
-# Process the uploaded file with detailed logging
 def process_file(file, state):
+    """Handles the uploaded file, processes its text, and prepares it for querying."""
+    
     if file is None:
         logger.info("No file uploaded.")
         return [("Bot", "Please upload a file.")], state
+
+    # Determine file type and extract text accordingly.
     
     file_path = file.name
     if file_path.lower().endswith(".pdf"):
@@ -74,9 +89,12 @@ def process_file(file, state):
     else:
         logger.error(f"Unsupported file format: {file_path}")
         return [("Bot", "Unsupported file format. Please upload a PDF or TXT file.")], state
-    
+
+    # Split document into sections and encode them into embeddings.
     sections = text.split('\n\n')
     section_embeddings = embedder.encode(sections, convert_to_tensor=True)
+
+    # Store extracted text and embeddings in the chatbot's state dictionary.  
     state['document_text'] = text
     state['sections'] = sections
     state['section_embeddings'] = section_embeddings
@@ -87,56 +105,77 @@ def process_file(file, state):
     logger.info(f"Processed file: {file_path}")
     return state['chat_history'], state
 
-# Handle user input (queries and feedback)
+
 def handle_input(user_input, state):
+    """Processes user queries, fetches answers, and handles feedback loops."""
+
     if state['mode'] == 'waiting_for_upload':
         state['chat_history'].append(("Bot", "Please upload a file first."))
         logger.info("User attempted to interact without uploading a file.")
+        
     elif state['mode'] == 'waiting_for_query':
         query = user_input
         state['current_query'] = query
         state['feedback_count'] = 0
+
+        # Finding the best matching section.
         context = find_relevant_section(query, state['sections'], state['section_embeddings'])
+
+        # Generating an answer using the QA model.
         if context == "I don’t have enough information to answer that.":
             answer = context
         else:
             result = qa_model(question=query, context=context)
             answer = result["answer"]
+            
         state['last_answer'] = answer
         state['mode'] = 'waiting_for_feedback'
         state['chat_history'].append(("User", query))
         state['chat_history'].append(("Bot", f"Answer: {answer}\nPlease provide feedback: good, too vague, not helpful."))
         logger.info(f"Query: {query}, Answer: {answer}")
+        
     elif state['mode'] == 'waiting_for_feedback':
         feedback = user_input.lower()
         state['chat_history'].append(("User", feedback))
         logger.info(f"Feedback: {feedback}")
+
+        # Handling feedback responses.
+        
         if feedback == "good" or state['feedback_count'] >= 2:
             state['mode'] = 'waiting_for_query'
+            
             if feedback == "good":
                 state['chat_history'].append(("Bot", "Thank you for your feedback. You can ask another question."))
                 logger.info("Feedback accepted as 'good'. Waiting for next query.")
+                
             else:
                 state['chat_history'].append(("Bot", "Maximum feedback iterations reached. You can ask another question."))
                 logger.info("Max feedback iterations reached. Waiting for next query.")
+                
         else:
             query = state['current_query']
             context = find_relevant_section(query, state['sections'], state['section_embeddings'])
+            
             if feedback == "too vague":
                 adjusted_answer = f"{state['last_answer']}\n\n(More details:\n{context[:500]}...)"
+                
             elif feedback == "not helpful":
                 adjusted_answer = qa_model(question=query + " Please provide more detailed information with examples.", context=context)['answer']
+                
             else:
                 state['chat_history'].append(("Bot", "Please provide valid feedback: good, too vague, not helpful."))
                 logger.info(f"Invalid feedback received: {feedback}")
                 return state['chat_history'], state
+                
             state['last_answer'] = adjusted_answer
             state['feedback_count'] += 1
             state['chat_history'].append(("Bot", f"Updated answer: {adjusted_answer}\nPlease provide feedback: good, too vague, not helpful."))
             logger.info(f"Adjusted answer: {adjusted_answer}")
+            
     return state['chat_history'], state
 
 # Function to return the up-to-date log file for download
+
 def get_log_file():
     # Flush all log handlers to ensure log file is current
     for handler in logger.handlers:
@@ -148,7 +187,7 @@ def get_log_file():
     logger.info("Log file downloaded by user.")
     return "support_bot_log.txt"
 
-# Initial state
+# Initial state setup
 initial_state = {
     'document_text': None,
     'sections': None,
