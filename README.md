@@ -1,7 +1,7 @@
 # Customer Support Bot with Document Training
 
 ## Overview:
-Welcome to the **Customer Support Bot project!** This project was developed as an intelligent end-to-end solution to create a smart, agentic workflow in Python that:
+Welcome to the **Customer Support Bot project!** This project was developed as an intelligent end-to-end solution to create a smart and robust agentic workflow in Python that:
 
 - **Trains on a provided document** (a PDF or TXT FAQ file)
 - **Answers customer queries** using a pre-trained question-answering model
